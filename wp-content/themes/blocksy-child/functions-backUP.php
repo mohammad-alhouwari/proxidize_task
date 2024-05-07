@@ -60,15 +60,12 @@ function search_api_proxy()
 
 		if (isset($products_data['products']) && is_array($products_data['products'])) {
 			foreach ($products_data['products'] as $product) {
-				// Extract product information
 				$name = $product['name'];
 				$price = $product['price'];
-				$category_names = explode(';;', $product['category']); // Split categories
-
+				$category_names = explode(';;', $product['category']);
 				$existing_product = get_page_by_title($name, OBJECT, 'product');
 
 				if (!$existing_product) {
-					// Create new product
 					$new_product = array(
 						'post_title' => $name,
 						'post_content' => '',
@@ -76,14 +73,11 @@ function search_api_proxy()
 						'post_type' => 'product',
 					);
 
-					// Insert product and get its ID
 					$product_id = wp_insert_post($new_product);
 
-					// Set product price
 					update_post_meta($product_id, '_regular_price', $price);
 					update_post_meta($product_id, '_price', $price);
 
-					// Set product categories
 					$term_ids = array();
 					foreach ($category_names as $category_name) {
 						$term = get_term_by('name', $category_name, 'product_cat');

@@ -11,35 +11,42 @@ add_action('wp_enqueue_scripts', function () {
 function ti_custom_javascript()
 {
 ?>
-	<script>
-		jQuery(document).ready(function($) {
-			const search_input = $('form.ct-search-form input[type="search"]');
-			console.log(search_input);
-			search_input.on('change', function() {
-				$.ajax({
-					type: "GET",
-					url: "<?php echo admin_url('admin-ajax.php'); ?>",
-					data: {
-						action: 'search_api_proxy',
-						query: $(this).val()
-					},
-					success: function(response) {
-						const inputElement = document.querySelector('.modal-field');
-						const inputEvent = new Event('input', {
-							bubbles: true, 
-							cancelable: true,
-						});
-						inputElement.dispatchEvent(inputEvent);
-						console.log(response);
-					},
-					error: function(xhr, status, error) {
-						console.error(xhr.responseText);
-					}
-				});
-			});
-		});
-		
-	</script>
+    <script>
+        jQuery(document).ready(function($) {
+            const searchForm = $('form.ct-search-form');
+            const searchInput = searchForm.find('input[type="search"]');
+            
+            searchForm.on('submit', function(event) {
+                event.preventDefault(); 
+                
+                $.ajax({
+                    type: "GET",
+                    url: "<?php echo admin_url('admin-ajax.php'); ?>",
+                    data: {
+                        action: 'search_api_proxy',
+                        query: searchInput.val()
+                    },
+                    success: function(response) {
+                        const inputElement = document.querySelector('.modal-field');
+                        const inputEvent = new Event('input', {
+                            bubbles: true,
+                            cancelable: true,
+                        });
+                        inputElement.dispatchEvent(inputEvent);
+                        console.log(response);
+                        
+                        
+                        searchForm.off('submit').submit();
+                    },
+                    error: function(xhr, status, error) {
+                        console.error(xhr.responseText);
+                       
+                    }
+                });
+            });
+        });
+        
+    </script>
 <?php
 }
 add_action('wp_head', 'ti_custom_javascript');
@@ -60,10 +67,9 @@ function search_api_proxy()
 
 		if (isset($products_data['products']) && is_array($products_data['products'])) {
 			foreach ($products_data['products'] as $product) {
-				// Extract product information
 				$name = $product['name'];
 				$price = $product['price'];
-				$category_names = explode(';;', $product['category']); // Split categories
+				$category_names = explode(';;', $product['category']); 
 
 				$existing_product = get_page_by_title($name, OBJECT, 'product');
 
@@ -75,14 +81,11 @@ function search_api_proxy()
 						'post_type' => 'product',
 					);
 
-					// Insert product and get its ID
 					$product_id = wp_insert_post($new_product);
 
-					// Set product price
 					update_post_meta($product_id, '_regular_price', $price);
 					update_post_meta($product_id, '_price', $price);
 
-					// Set product categories
 					$term_ids = array();
 					foreach ($category_names as $category_name) {
 						$term = get_term_by('name', $category_name, 'product_cat');
