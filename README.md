@@ -10,8 +10,9 @@ Follow these steps to set up the Proxidize Task project on your local machine:
 
 1. Clone the repository directly into the `htdocs` directory of your XAMPP installation:
     ```bash
-    git clone https://github.com/mohammad-alhouwari/proxidize_task.git xampp\htdocs\proxidize_task
+    git clone https://github.com/mohammad-alhouwari/proxidize_task.git
     ```
+    It should appear as `/xampp/htdocs/proxidize_task`
 
 2. Create a new database named `wordpress` in your local MySQL server.
 
